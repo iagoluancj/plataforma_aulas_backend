@@ -43,8 +43,6 @@ INSTALLED_APPS = [
     'django_extensions',
     'corsheaders',
     'drf_yasg',  
-    'aulas',
-    'usuarios',
     'plataforma_aulas',
 ]
 
@@ -172,5 +170,3 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': timedelta(days=1),
     'REFRESH_TOKEN_LIFETIME': timedelta(days=7),
 }
-
-AUTH_USER_MODEL = 'plataforma_aulas.CustomUser' 
