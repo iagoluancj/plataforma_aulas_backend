@@ -4,8 +4,8 @@ from rest_framework import viewsets
 from rest_framework.views import APIView
 from rest_framework.permissions import IsAuthenticated
 from rest_framework.permissions import AllowAny
-from .models import CustomUser, Class, Enrollment
-from .serializers import CustomUserSerializer, ClassSerializer, EnrollmentSerializer
+from .models import CustomUser, Classes, Enrollment
+from .serializers import CustomUserSerializer, ClassesSerializer, EnrollmentSerializer
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 
@@ -21,24 +21,22 @@ class UserViewSet(viewsets.ModelViewSet):
 
 # API de Aulas
 class ClassViewSet(viewsets.ModelViewSet):
-    queryset = Class.objects.all()
-    serializer_class = ClassSerializer
+    queryset = Classes.objects.all()
+    serializer_class = ClassesSerializer
 
-    def perform_create(self, serializer):
-        default_instructor_id = UUID("9AC16DAA-7861-4FB4-9872-5462B9A1FAEE")
-
-        try:
-            default_instructor = CustomUser.objects.get(id=default_instructor_id)  
-        except ObjectDoesNotExist:
-            raise ValueError(f"O usuário instrutor padrão com ID {default_instructor_id} não existe no banco de dados.")
-
-        instructor = self.request.user if self.request.user.is_authenticated else default_instructor
-        serializer.save(instructor=instructor)
 
 # API de Inscrições
 class EnrollmentViewSet(viewsets.ModelViewSet):
-    queryset = Enrollment.objects.all()
     serializer_class = EnrollmentSerializer
+
+    def get_queryset(self):
+        queryset = Enrollment.objects.all()
+        student_id = self.request.query_params.get('student')
+
+        if student_id:
+            queryset = queryset.filter(student_id=student_id)
+
+        return queryset
 
 class LoginView(APIView):
     permission_classes = [AllowAny]

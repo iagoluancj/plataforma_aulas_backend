@@ -5,8 +5,7 @@ from .views import UserViewSet, ClassViewSet, EnrollmentViewSet, LoginView
 router = DefaultRouter()
 router.register(r'users', UserViewSet)
 router.register(r'classes', ClassViewSet)
-router.register(r'enrollments', EnrollmentViewSet)
-
+router.register(r'enrollments', EnrollmentViewSet, basename='enrollment')
 
 urlpatterns = [
     path('api/', include(router.urls)),
