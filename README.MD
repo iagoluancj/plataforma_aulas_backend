@@ -40,11 +40,11 @@ python manage.py runserver
 ```
 
 #  Credenciais para teste após iniciar o servidor
-Estudante
--Email: student@example.com
--Senha: student123
+**Estudante**
+- Email: student@example.com
+- Senha: student123
 
-Instrutor
--Email: instructor@example.com
--Senha: instructor123
+**Instrutor**
+- Email: instructor@example.com
+- Senha: instructor123
 
