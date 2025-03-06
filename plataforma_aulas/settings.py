@@ -88,7 +88,7 @@ DATABASES = {
         'NAME': 'plataforma_aulas',
         'USER': 'superuser',
         'PASSWORD': 'SuperSecure123',
-        'HOST': 'localhost',  # ou o IP do servidor SQL
+        'HOST': 'localhost',  
         'PORT': '1433',
         'OPTIONS': {
             'driver': 'ODBC Driver 17 for SQL Server',

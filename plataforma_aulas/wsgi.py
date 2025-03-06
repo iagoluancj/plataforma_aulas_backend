@@ -13,4 +13,10 @@ from django.core.wsgi import get_wsgi_application
 
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'plataforma_aulas.settings')
 
+try:
+    from plataforma_aulas.seed import seed_database
+    seed_database()
+except Exception as e:
+    print(f"Erro ao popular o banco: {e}")
+
 application = get_wsgi_application()

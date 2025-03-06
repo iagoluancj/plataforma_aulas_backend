@@ -50,6 +50,7 @@ class Classes(models.Model):
     description = models.TextField()
     scheduled_at = models.DateTimeField()
     instructor = models.ForeignKey(CustomUser, on_delete=models.CASCADE, related_name="taught_classes")
+    link_video = models.URLField(null=True, blank=True)
 
     class Meta:
         db_table = 'classes'

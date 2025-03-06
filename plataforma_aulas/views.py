@@ -18,7 +18,6 @@ from rest_framework import status
 
 # API de Usuários
 class UserViewSet(viewsets.ModelViewSet):
-    # permission_classes = [IsAuthenticated]
     queryset = CustomUser.objects.all()
     serializer_class = CustomUserSerializer
     parser_classes = (MultiPartParser, FormParser)
@@ -31,40 +30,44 @@ class UserViewSet(viewsets.ModelViewSet):
 
     # Trata especificamente os arquivos que vem do profile_picture nos updates (put)
     def update(self, request, *args, **kwargs):
-        partial = kwargs.pop('partial', False)
-        instance = self.get_object()
-        
-        if 'profile_picture' in request.data:
-            instance.profile_picture.delete(save=False)  
-
-        serializer = self.get_serializer(instance, data=request.data, partial=partial)
-        serializer.is_valid(raise_exception=True)
-        self.perform_update(serializer)
-        
-        return Response(serializer.data)
+        try:
+            partial = kwargs.pop('partial', False)
+            instance = self.get_object()
+            if 'profile_picture' in request.data:
+                instance.profile_picture.delete(save=False)
+            
+            serializer = self.get_serializer(instance, data=request.data, partial=partial)
+            serializer.is_valid(raise_exception=True)
+            self.perform_update(serializer)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # API para criação de usuário
 class CreateUserView(APIView):
     def post(self, request, *args, **kwargs):
-        serializer = CustomUserSerializer(data=request.data)
-        # Tratativa de erros
-        if serializer.is_valid():
-            user = serializer.save()
-            return Response({'message': 'User created successfully', 'user': serializer.data, 'status': status.HTTP_201_CREATED}, status=status.HTTP_201_CREATED)
-        
-        # Tratativa de erros
-        if 'email' in serializer.errors:
-            return Response(
-                {'error': 'Email is already in use. Please choose another one.', 'status': status.HTTP_400_BAD_REQUEST},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        try:
+            serializer = CustomUserSerializer(data=request.data)
+            if serializer.is_valid():
+                user = serializer.save()
+                return Response({'message': 'User created successfully', 'user': serializer.data}, status=status.HTTP_201_CREATED)
+            if 'email' in serializer.errors:
+                return Response({'error': 'Email already in use'}, status=status.HTTP_400_BAD_REQUEST)
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # API de Aulas
 class ClassViewSet(viewsets.ModelViewSet):
     queryset = Classes.objects.all()
     serializer_class = ClassesSerializer
+
+    def get_queryset(self):
+        try:
+            instructor_id = self.request.query_params.get("instructor_id")
+            return Classes.objects.filter(instructor_id=instructor_id) if instructor_id else Classes.objects.all()
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
     # Caso seja criação de classes, verifica se o usuário com o IsInstructor.
     def get_permissions(self):
@@ -74,69 +77,61 @@ class ClassViewSet(viewsets.ModelViewSet):
 
     # Tratativa de erros
     def create(self, request, *args, **kwargs):
-        serializer = self.get_serializer(data=request.data)
-        if not serializer.is_valid():
-            return Response(
-                {"error": serializer.errors, "status": status.HTTP_400_BAD_REQUEST},
-                status=status.HTTP_400_BAD_REQUEST
-            )
-
-        self.perform_create(serializer)
-        return Response(serializer.data, status=status.HTTP_201_CREATED)
-
+        try:
+            serializer = self.get_serializer(data=request.data)
+            serializer.is_valid(raise_exception=True)
+            self.perform_create(serializer)
+            return Response(serializer.data, status=status.HTTP_201_CREATED)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 # API de Inscrições
 class EnrollmentViewSet(viewsets.ModelViewSet):
-    # permission_classes = [IsAuthenticated]
     serializer_class = EnrollmentSerializer
 
     def get_queryset(self):
-        queryset = Enrollment.objects.all()
-        student_id = self.request.query_params.get('student')
-
-        if student_id:
-            queryset = queryset.filter(student_id=student_id)
-
-        return queryset
+        try:
+            student_id = self.request.query_params.get('student')
+            return Enrollment.objects.filter(student_id=student_id) if student_id else Enrollment.objects.all()
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 class LoginView(TokenObtainPairView):
     serializer_class = CustomTokenObtainPairSerializer
-    # permission_classes = [AllowAny]
 
-
-    # @ratelimit(key='ip', rate='5/m', method='POST', block=True)
     def post(self, request):
-        email = request.data.get("email")
-        password = request.data.get("senha")  
-
-        user = authenticate(request, email=email, password=password)
-
-        if user is not None:
-            refresh = RefreshToken.for_user(user)
-            return Response({
-                "access": str(refresh.access_token),
-                "refresh": str(refresh),
-                "user": {
-                    "id": user.id,
-                    "full_name": user.full_name,
-                    "email": user.email,
-                    "role": user.role,
-                    "profile_picture": user.profile_picture.url if user.profile_picture else None
-
-                }
-            })
-        else:
+        try:
+            email = request.data.get("email")
+            password = request.data.get("senha")  
+            user = authenticate(request, email=email, password=password)
+            if user:
+                refresh = RefreshToken.for_user(user)
+                access_token = refresh.access_token 
+                access_token["role"] = getattr(user, "role", 0)
+                return Response({
+                    "access": str(access_token),
+                    "refresh": str(refresh),
+                    "user": {
+                        "id": user.id,
+                        "full_name": user.full_name,
+                        "email": user.email,
+                        "role": user.role,
+                        "profile_picture": user.profile_picture.url if user.profile_picture else None,
+                    }
+                })
             return Response({"error": "Credenciais inválidas"}, status=400)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
 
 class InstructorDashboardView(viewsets.ViewSet):
-    # permission_classes = [IsAuthenticated]  
 
     @action(detail=False, methods=['get'])
     def scheduled_classes(self, request):
-        # Filtra as aulas com base no instrutor da requisição
-        instructor = request.user
-        classes = Classes.objects.filter(instructor=instructor)
-
-        # Busca aulas com a contagem de participantes
-        serializer = ClassWithEnrollmentsSerializer(classes, many=True)
-        return Response(serializer.data)
+        try:
+            instructor = request.user
+            classes = Classes.objects.filter(instructor=instructor)
+            serializer = ClassWithEnrollmentsSerializer(classes, many=True)
+            return Response(serializer.data)
+        except Exception as e:
+            return Response({"error": str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

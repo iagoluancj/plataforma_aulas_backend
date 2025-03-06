@@ -7,7 +7,7 @@ import uuid
 class CustomUserSerializer(serializers.ModelSerializer):
     class Meta:
         model = CustomUser
-        fields = ['id', 'full_name', 'email', 'password', 'role']
+        fields = ['id', 'full_name', 'email', 'password', 'role', 'profile_picture']
         extra_kwargs = {'password': {'write_only': True}}  
     
     def create(self, validated_data):
@@ -37,7 +37,7 @@ class ClassesSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = Classes
-        fields = ['id', 'title', 'description', 'scheduled_at', 'instructor_id', 'instructor_name']
+        fields = ['id', 'title', 'description', 'scheduled_at', 'instructor_id', 'instructor_name', 'link_video']
 
     def get_instructor_name(self, obj):
         return obj.instructor.full_name if hasattr(obj.instructor, 'full_name') else obj.instructor.username
@@ -70,7 +70,5 @@ class CustomTokenObtainPairSerializer(TokenObtainPairSerializer):
     @classmethod
     def get_token(cls, user):
         token = super().get_token(user)
-
-        token['role'] = user.role  
 
         return token
