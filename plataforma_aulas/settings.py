@@ -11,6 +11,7 @@ https://docs.djangoproject.com/en/4.2/ref/settings/
 """
 
 from pathlib import Path
+from decouple import config
 from datetime import timedelta
 import os
 
@@ -22,7 +23,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/4.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-0p5$7qjd7!-aal7@(@ek%%su=w!8wme(=5gk)_c$xo+($iec%w'
+SECRET_KEY = config("SECRET_KEY")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
@@ -86,14 +87,13 @@ DATABASES = {
     'default': {
         'ENGINE': 'mssql',
         'NAME': 'plataforma_aulas',
-        'USER': 'superuser',
-        'PASSWORD': 'SuperSecure123',
-        'HOST': 'localhost',  
-        'PORT': '1433',
-        'OPTIONS': {
+        'USER': config("USER"),
+        'PASSWORD': config("PASSWORD"),
+        'HOST':config('HOST'),
+        # 'PORT': '1433',
+        'OPTIONS':{
             'driver': 'ODBC Driver 17 for SQL Server',
-            'trusted_connection': 'yes', 
-            'schema': 'dbo', 
+            'Trusted_Connection': 'yes',
         },
     }
 }
