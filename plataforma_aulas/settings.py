@@ -90,7 +90,7 @@ DATABASES = {
         'USER': config("USER"),
         'PASSWORD': config("PASSWORD"),
         'HOST':config('HOST'),
-        # 'PORT': '1433',
+        'PORT': '1433',
         'OPTIONS':{
             'driver': 'ODBC Driver 17 for SQL Server',
             'Trusted_Connection': 'yes',
