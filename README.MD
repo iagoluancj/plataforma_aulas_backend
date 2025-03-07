@@ -70,6 +70,13 @@ python manage.py makemigrations
 python manage.py migrate
 ```
 
+### *(Opcional)* Populando o Banco de Dados:
+- Após aplicar as migrações, você pode popular o banco de dados com dados iniciais executando o seguinte comando:
+```
+python seed.py
+```
+> Isso criará automaticamente os registros necessários, usuários (instutores e estudantes), aulas, estudantes vinculados as aulas, garantindo que o sistema tenha dados para teste e desenvolvimento.
+
 ## Uso:
 1. Para inicializar a aplicação:
 ```
