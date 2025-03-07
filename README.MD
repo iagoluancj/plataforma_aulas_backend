@@ -76,7 +76,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 2. Caso o front-end já esteja configurado, basta acessar [Local host](http://localhost:3000/). 
-2.1 Caso ainda não esteja, acesse: [Documentação frontend](https://github.com/iagoluancj/plataforma_aulas_frontend)
+<br/> 2.1 Caso ainda não esteja, acesse: [Documentação frontend](https://github.com/iagoluancj/plataforma_aulas_frontend)
 
 3. Acesso pode ser realizado no navegador através do http://127.0.0.1:8000/ - Para mais informações End-Points acesse a documentação no último tópico.
 
